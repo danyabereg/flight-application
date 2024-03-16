@@ -1,0 +1,159 @@
+CREATE TABLE aircraft (
+    id serial PRIMARY KEY ,
+    model varchar(128) NOT NULL
+);
+
+CREATE TABLE airport (
+  code char(3) PRIMARY KEY ,
+    country varchar(256) NOT NULL ,
+    city varchar(128) NOT NULL
+);
+
+CREATE TABLE seat (
+    aircraft_id integer NOT NULL ,
+    seat_no varchar(4) NOT NULL ,
+    PRIMARY KEY (aircraft_id, seat_no) ,
+    FOREIGN KEY (aircraft_id) REFERENCES aircraft(id) ON UPDATE CASCADE
+);
+
+CREATE TABLE flight (
+    id bigserial PRIMARY KEY ,
+    flight_no varchar(16) NOT NULL ,
+    departure_date timestamp NOT NULL ,
+    departure_airport_code char(3) NOT NULL ,
+    arrival_date timestamp NOT NULL ,
+    arrival_airport_code char(3) NOT NULL ,
+    aircraft_id integer NOT NULL ,
+    status varchar(32) NOT NULL ,
+    FOREIGN KEY (departure_airport_code) REFERENCES airport(code) ON UPDATE CASCADE ,
+    FOREIGN KEY (arrival_airport_code) REFERENCES airport(code) ON UPDATE CASCADE ,
+    FOREIGN KEY (aircraft_id) REFERENCES aircraft(id) ON UPDATE CASCADE
+);
+
+CREATE TABLE ticket (
+    id bigserial PRIMARY KEY ,
+    passport_no varchar(64) NOT NULL UNIQUE ,
+    passenger_name varchar(256) NOT NULL ,
+    flight_id bigint NOT NULL ,
+    seat_no char(4) NOT NULL ,
+    cost numeric(8, 2) NOT NULL ,
+    FOREIGN KEY (flight_id) REFERENCES flight(id) ON UPDATE CASCADE
+);
+
+INSERT INTO aircraft (model)
+VALUES ('Boeing-777') ,
+       ('Airbus-A320') ,
+       ('SSJ-100') ,
+       ('MC-21') ,
+       ('Boeing-737');
+
+INSERT INTO airport (code, country, city)
+VALUES ('MNK', 'Belarus', 'Minsk') ,
+       ('LDN', 'United Kingdom', 'London') ,
+       ('MSK', 'Russia', 'Moscow') ,
+       ('BSL', 'France', 'Basel');
+
+INSERT INTO flight (flight_no, departure_date, departure_airport_code, arrival_date, arrival_airport_code, aircraft_id, status)
+VALUES ('MN3002', '2020-06-14 14:30:00', 'MNK', '2020-06-14 18:07:00', 'LDN', 1, 'ARRIVED') ,
+       ('MN3002', '2020-06-16 09:15:00', 'LDN', '2020-06-16 13:00:00', 'MNK', 1, 'ARRIVED') ,
+       ('BC2801', '2020-07-28 23:25:00', 'MNK', '2020-07-29 02:43:00', 'LDN', 2, 'ARRIVED') ,
+       ('BC2801', '2020-08-01 11:00:00', 'LDN', '2020-08-01 14:15:00', 'MNK', 2, 'DEPARTED') ,
+       ('TR3103', '2020-05-03 13:10:00', 'MSK', '2020-05-03 18:38:00', 'BSL', 3, 'ARRIVED') ,
+       ('TR3103', '2020-05-10 07:15:00', 'BSL', '2020-05-10 12:44:00', 'MSK', 3, 'CANCELLED') ,
+       ('CV9827', '2020-09-09 18:00:00', 'MNK', '2020-09-09 19:15:00', 'MSK', 4, 'SCHEDULED') ,
+       ('CV9827', '2020-09-19 08:55:00', 'MSK', '2020-09-19 10:05:00', 'MNK', 4, 'SCHEDULED') ,
+       ('QS8712', '2020-12-18 03:35:00', 'MNK', '2020-12-18 06:46:00', 'LDN', 2, 'ARRIVED');
+
+INSERT INTO seat (aircraft_id, seat_no)
+VALUES ('1', 'A1'),
+       ('1', 'A2'),
+       ('1', 'B1'),
+       ('1', 'B2'),
+       ('1', 'C1'),
+       ('1', 'C2'),
+       ('1', 'D1'),
+       ('1', 'D2'),
+       ('2', 'A1'),
+       ('2', 'A2'),
+       ('2', 'B1'),
+       ('2', 'B2'),
+       ('2', 'C1'),
+       ('2', 'C2'),
+       ('2', 'D1'),
+       ('2', 'D2'),
+       ('3', 'A1'),
+       ('3', 'A2'),
+       ('3', 'B1'),
+       ('3', 'B2'),
+       ('3', 'C1'),
+       ('3', 'C2'),
+       ('3', 'D1'),
+       ('3', 'D2'),
+       ('4', 'A1'),
+       ('4', 'A2'),
+       ('4', 'B1'),
+       ('4', 'B2'),
+       ('4', 'C1'),
+       ('4', 'C2'),
+       ('4', 'D1'),
+       ('4', 'D2');
+
+ALTER TABLE ticket
+    ADD CONSTRAINT constraint_seat_no UNIQUE (flight_id, seat_no);
+
+INSERT INTO ticket (passport_no, passenger_name, flight_id, seat_no, cost)
+VALUES ('112233', 'Иван Иванов', 1, 'A1', 200.00) ,
+       ('45H34H', 'Петр Ефимов', 1, 'A2', 180.00) ,
+       ('FUI234', 'Анжела Петрова', 1, 'B1', 175.00) ,
+       ('QQQ222', 'Никита Сидоров', 1, 'B2', 175.00) ,
+       ('LLL444', 'Андрей Петров', 1, 'C1', 99.00) ,
+       ('VVV777', 'Олег Рубцов', 1, 'C2', 80.00) ,
+       ('444LLL', 'Семен Колобков', 1, 'D1', 58.00) ,
+       ('CCC888', 'Ирина Петрова', 1, 'D2', 150.00) ,
+       ('AAA999', 'Ольга Семенова', 2, 'A1', 130.00) ,
+       ('OOO111', 'Федор Васильев', 2, 'B2', 120.00) ,
+       ('LLL333', 'Никита Кологривый', 2, 'C1', 119.00) ,
+       ('888BBB', 'Дмитрий Нагиев', 2, 'D2', 115.00) ,
+       ('DDVD88', 'Иван Барабан', 3, 'A2', 95.00) ,
+       ('DLVD35', 'Олег Фомин', 3, 'B1', 170.00) ,
+       ('GKFBF3', 'Александр Борода', 3, 'C2', 180.00) ,
+       ('2MKMKV', 'Александра Симнова', 3, 'D1', 160.00) ,
+       ('KFB772', 'Елена Ольгова', 4, 'A1', 140.00) ,
+       ('MKOFV9', 'Иван Ольха', 4, 'A2', 150.00) ,
+       ('KMFDV8', 'Иван Ураган', 4, 'B1', 130.00) ,
+       ('NWFSS8', 'Дмитрий Мухин', 4, 'D1', 145.00) ,
+       ('LMSDV9', 'Петр Данилов', 4, 'D2', 155.00) ,
+       ('352KKD', 'Зарина Иванова', 5, 'A1', 165.00) ,
+       ('345MM2', 'Ульяна Борисова', 5, 'B1', 175.00) ,
+       ('KOD923', 'Иван Петров', 5, 'C1', 185.00) ,
+       ('POKDFV', 'Олег Газманов', 5, 'D1', 220.00) ,
+       ('903RKK', 'Филипп Киркоров', 6, 'A2', 210.00) ,
+       ('1934T2', 'Ольга Иванова', 6, 'B2', 205.00) ,
+       ('KDFV93', 'Даниил Уткин', 6, 'C2', 100.00) ,
+       ('KVFD92', 'Семен Орлов', 6, 'D2', 149.00) ,
+       ('POSDV9', 'Хасан Иванов', 7, 'A1', 159.00) ,
+       ('MODV23', 'Дмитрий Пирогов', 7, 'B2', 139.00) ,
+       ('KDFV92', 'Ирина Луткова', 7, 'C1', 188.00) ,
+       ('MDFVD2', 'Валерия Головина', 7, 'D2', 147.00) ,
+       ('MOIGB9', 'Александра Русакова', 8, 'A2', 138.00) ,
+       ('POGHN0', 'Иван Ураган', 8, 'B1', 127.00) ,
+       ('POKHN3', 'Денис Никто', 8, 'C2', 88.00) ,
+       ('O0B03D', 'Ольга Филонова', 8, 'D1', 133.00) ,
+       ('FNBF92', 'Андрей Волосатов', 9, 'A1', 144.00) ,
+       ('MFGBF9', 'Максим Темкин', 9, 'B1', 155.00) ,
+       ('MGHGB8', 'Юлий Шаталов', 9, 'C1', 166.00) ,
+       ('546J4V', 'Егор Погиба', 9, 'D1', 136.00) ,
+       ('57447K', 'Егор Медведев', 9, 'D2', 156.00);
+
+       CREATE TABLE users (
+                              id SERIAL PRIMARY KEY ,
+                              name VARCHAR(124) NOT NULL ,
+                              birthday DATE NOT NULL ,
+                              email VARCHAR(124) NOT NULL ,
+                              password VARCHAR(32) NOT NULL ,
+                              role VARCHAR(32) NOT NULL ,
+                              gender VARCHAR(32) NOT NULL
+       );
+
+       INSERT INTO users (name, birthday, email, password, role, gender)
+       VALUES ('Андрей', '2023-03-27', '111', '123', 'ADMIN', 'MALE');
